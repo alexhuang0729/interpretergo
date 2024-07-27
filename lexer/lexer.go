@@ -39,7 +39,13 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch // So we don't lose the current character and can safely advance the lexer
+			l.readChar()
+			tok = token.Token{Type: token.EQ, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case '(':
@@ -50,6 +56,24 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.COMMA, l.ch)
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.NOT_EQ, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
 	case '{':
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
@@ -65,6 +89,7 @@ func (l *Lexer) NextToken() token.Token {
 		} else if isDigit(l.ch) {
 			tok.Type = token.INT
 			tok.Literal = l.readNumber()
+			return tok
 		} else { // Declare token as illegal if we don't recognize it
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
@@ -111,4 +136,12 @@ func (l *Lexer) readNumber() string {
 
 func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
+}
+
+func (l *Lexer) peekChar() byte { //Similar to readChar(), except it doesn't increment l.position and l.readPosition
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
 }
