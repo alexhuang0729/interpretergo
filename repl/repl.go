@@ -15,6 +15,7 @@ import (
 	"interpretergo/lexer"
 	"interpretergo/token"
 	"io"
+	"strings"
 )
 
 const PROMPT = ">>"
@@ -29,6 +30,10 @@ func Start(in io.Reader, out io.Writer) {
 		}
 
 		line := scanner.Text()
+
+		if strings.ToLower(line) == "break" {
+			return
+		}
 
 		l := lexer.New(line)
 
