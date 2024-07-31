@@ -46,3 +46,12 @@ type Identifier struct { // implements the Expression interface
 
 func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+
+type ReturnStatement struct {
+	Token       token.Token // the 'return' token
+	ReturnValue Expression  // expression that's to be returned
+}
+
+// fulfill the Node and Statement interfaces and look identical to the methods defined on *ast.LetStatement
+func (rs *ReturnStatement) statementNode()       {}
+func (rs *ReturnStatement) TokenLiteral() string { return rs.TokenLiteral() }
