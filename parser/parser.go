@@ -15,6 +15,10 @@ type Parser struct {
 	// Exactly like position and peekPosition, point to the current and next token
 
 	errors []string
+
+	// Check if the appropriate map has a parsing function associated with curToken.Type
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 func New(l *lexer.Lexer) *Parser {
@@ -29,6 +33,14 @@ func New(l *lexer.Lexer) *Parser {
 }
 func (p *Parser) Errors() []string {
 	return p.errors
+}
+
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }
 
 func (p *Parser) peekError(t token.TokenType) {
@@ -120,3 +132,9 @@ func (p *Parser) expectPeek(t token.TokenType) bool {
 		return false
 	}
 }
+
+type ( // Pratt parser associates parsing functions with token types
+	// Parsing functions are called to parse the appropriate expression and return an AST node that represents it
+	prefixParseFn func() ast.Expression               // Gets called when encounter the associated token type in prefix position
+	infixParseFn  func(ast.Expression) ast.Expression // Gets called when we encounter the token type in infix position
+)
